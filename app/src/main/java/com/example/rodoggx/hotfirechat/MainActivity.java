@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton photoPickerButton;
     private EditText messageEditText;
     private Button sendButton;
+
+    //Firebase instance variables
     private FirebaseDatabase firebaseDb;
     private DatabaseReference dbReference;
     private ChildEventListener childEventListener;
@@ -54,30 +56,36 @@ public class MainActivity extends AppCompatActivity {
 
         userName = ANONYMOUS;
 
+        //Initialize Firebase components
         firebaseDb = FirebaseDatabase.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
 
         dbReference = firebaseDb.getReference().child("messageItems");
 
+        //Initialize references to views
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         messageListView = (ListView) findViewById(R.id.messageListView);
         photoPickerButton = (ImageButton) findViewById(R.id.photoPickerButton);
         messageEditText = (EditText) findViewById(R.id.messageEditText);
         sendButton = (Button) findViewById(R.id.sendButton);
 
-        final List<MessageItem> messageItems = new ArrayList<>();
+        //Initialize message ListView and its adapter
+        List<MessageItem> messageItems = new ArrayList<>();
         messageAdapter = new MessageAdapter(this, R.layout.message, messageItems);
         messageListView.setAdapter(messageAdapter);
 
+        //Initialize progress bar
         progressBar.setVisibility(ProgressBar.INVISIBLE);
 
+        //ImagePickerButton shows an image picker to upload a image for a message
         photoPickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                // TODO: add Intent to show an image picker
             }
         });
 
+        // Enable Send button when there's text to send
         messageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -95,18 +103,19 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
         messageEditText.setFilters(new InputFilter[] {
                 new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)
         });
 
+        // Send button sends a message and clears the EditText
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MessageItem newMessageItem = new MessageItem(messageEditText.getText().toString(), userName, null);
                 dbReference.push().setValue(newMessageItem);
+                // Clear input box
                 messageEditText.setText("");
             }
         });
@@ -143,13 +152,15 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Welcome to Hot Fire Chat", Toast.LENGTH_SHORT).show();
                 } else {
                     //user sign out
+                    List<AuthUI.IdpConfig> providers = Arrays.asList(
+                            new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
+                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build());
+
                     startActivityForResult(
                             // Get an instance of AuthUI based on the default app
                             AuthUI.getInstance().createSignInIntentBuilder()
                                     .setIsSmartLockEnabled(false)
-                                    .setAvailableProviders(
-                                            Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-                                                          new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
+                                    .setAvailableProviders(providers)
                                     .build(),
                             RC_SIGN_IN);
                 }
