@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "517649851349",
+    "firebase_url": "https://hot-fire-chat.firebaseio.com",
+    "project_id": "hot-fire-chat",
+    "storage_bucket": "hot-fire-chat.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:517649851349:android:a9126b7d06123f5d",
+        "android_client_info": {
+          "package_name": "com.example.rodoggx.hotfirechat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "517649851349-ps1aqcefeor5sbl22e7r17nrepco6ker.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rodoggx.hotfirechat",
+            "certificate_hash": "26535887cf936331bb4456206ba946b3575dcac8"
+          }
+        },
+        {
+          "client_id": "517649851349-ul7m5jmd3blku7p9a4f33p4337lhp74a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiWYbMKkdVb_ew-0NVeO7no-BMwmxZmYg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "517649851349-ul7m5jmd3blku7p9a4f33p4337lhp74a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
