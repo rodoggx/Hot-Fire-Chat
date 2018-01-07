@@ -1,5 +1,6 @@
 package com.example.rodoggx.hotfirechat;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -105,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
             }
         });
-        messageEditText.setFilters(new InputFilter[] {
+        messageEditText.setFilters(new InputFilter[]{
                 new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)
         });
 
@@ -119,30 +120,7 @@ public class MainActivity extends AppCompatActivity {
                 messageEditText.setText("");
             }
         });
-        childEventListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                MessageItem newMessageItem = dataSnapshot.getValue(MessageItem.class);
-                messageAdapter.add(newMessageItem);
-            }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        };
-        dbReference.addChildEventListener(childEventListener);
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -150,8 +128,12 @@ public class MainActivity extends AppCompatActivity {
                 if (user != null) {
                     //user sign in
                     Toast.makeText(MainActivity.this, "Welcome to Hot Fire Chat", Toast.LENGTH_SHORT).show();
+                    onSignedInitialize(user.getDisplayName());
                 } else {
                     //user sign out
+                    onSignedOutCleanup();
+
+                    //List of authentication providers
                     List<AuthUI.IdpConfig> providers = Arrays.asList(
                             new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
                             new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build());
@@ -169,6 +151,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            if (resultCode == RESULT_OK) {
+                // Sign-in successful, set up UI
+                Toast.makeText(this, "Signed In", Toast.LENGTH_SHORT).show();
+            } else if (requestCode == RESULT_CANCELED) {
+                Toast.makeText(this, "Sign in canceled", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         firebaseAuth.addAuthStateListener(authStateListener);
@@ -179,4 +175,56 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         firebaseAuth.removeAuthStateListener(authStateListener);
     }
+
+    private void onSignedInitialize(String username) {
+        userName = username;
+        attachDatabaseReadListener();
+    }
+
+    private void onSignedOutCleanup() {
+        userName = ANONYMOUS;
+        messageAdapter.clear();
+        detachDatabaseReadListener();
+    }
+
+    private void attachDatabaseReadListener() {
+        if (childEventListener == null) {
+            childEventListener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    MessageItem messageItem = dataSnapshot.getValue(MessageItem.class);
+                    messageAdapter.add(messageItem);
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            };
+            dbReference.addChildEventListener(childEventListener);
+        }
+    }
+
+    private void detachDatabaseReadListener() {
+        if (childEventListener != null) {
+            dbReference.removeEventListener(childEventListener);
+            childEventListener = null;
+        }
+    }
+
 }
